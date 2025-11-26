@@ -1,0 +1,10 @@
+Model,Test_Accuracy
+BiLSTM-DenseNet (25 epochs),0.920854157
+BiLSTM-DenseNet (40 epochs),0.924398001
+BiLSTM-DenseNet (without noise),0.92567015
+AttRNN,0.905770104
+AttRNN (without noise),0.909194751
+CNN-M5(raw 8k) ,0.785097683
+CNN-M5(raw 8k) (without noise),0.800636075
+LSTM_plain,0.882326215
+LSTM-Plain (without noise),0.892235348
