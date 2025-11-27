@@ -1,8 +1,3 @@
-"""
-Generate confusion matrices for trained AttRNN and BiLSTM-DenseNet models.
-Loads best .pth checkpoints and evaluates on test set.
-"""
-
 import os
 import argparse
 import numpy as np
@@ -228,9 +223,10 @@ def plot_confusion_matrix(y_true, y_pred, labels, model_name, save_path):
     plt.figure(figsize=(16, 14))
     
     # Plot confusion matrix
-    sns.heatmap(cm, annot=False, fmt='d', cmap='Blues', 
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                 xticklabels=labels, yticklabels=labels,
-                cbar_kws={'label': 'Count'})
+                cbar_kws={'label': 'Count'},
+                annot_kws={'fontsize': 7})
     
     plt.title(f'Confusion Matrix - {model_name}', fontsize=16, pad=20)
     plt.ylabel('True Label', fontsize=12)
@@ -247,9 +243,10 @@ def plot_confusion_matrix(y_true, y_pred, labels, model_name, save_path):
     # Also save normalized version
     cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
     plt.figure(figsize=(16, 14))
-    sns.heatmap(cm_normalized, annot=False, fmt='.2f', cmap='Blues',
+    sns.heatmap(cm_normalized, annot=True, fmt='.2f', cmap='Blues',
                 xticklabels=labels, yticklabels=labels,
-                cbar_kws={'label': 'Normalized Count'})
+                cbar_kws={'label': 'Normalized Count'},
+                annot_kws={'fontsize': 7})
     
     plt.title(f'Normalized Confusion Matrix - {model_name}', fontsize=16, pad=20)
     plt.ylabel('True Label', fontsize=12)
