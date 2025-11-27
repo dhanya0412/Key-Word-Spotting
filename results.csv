@@ -8,3 +8,5 @@ CNN-M5(raw 8k) ,0.785097683
 CNN-M5(raw 8k) (without noise),0.800636075
 LSTM_plain,0.882326215
 LSTM-Plain (without noise),0.892235348
+HMM-GMM (without noise),0.65459560459
+HMM-GMM (with noise), 0.6203
