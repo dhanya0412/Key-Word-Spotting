@@ -1,4 +1,3 @@
-
 import os
 import math
 import torch
@@ -13,9 +12,7 @@ import pandas as pd
 import random
 import argparse
 
-# -------------------------
-# Config / arguments
-# -------------------------
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--base_dir", type=str, default="/content/drive/MyDrive/KWS_project", help="Drive project folder")
 parser.add_argument("--batch_size", type=int, default=256)
@@ -42,9 +39,6 @@ print("Base dir:", BASE_DIR)
 print("Debug mode:", args.debug)
 print("Epochs:", N_EPOCHS)
 
-# -------------------------
-# Subset dataset wrapper (same split files as repo)
-# -------------------------
 import os
 
 class SubsetSC(SPEECHCOMMANDS):
@@ -62,9 +56,6 @@ class SubsetSC(SPEECHCOMMANDS):
             excludes = set(load_list("validation_list.txt") + load_list("testing_list.txt"))
             self._walker = [w for w in self._walker if w not in excludes]
 
-# -------------------------
-# Helpers: label maps, collate, pad/truncate
-# -------------------------
 def get_labels(dataset):
     # build sorted label list from training set (stable across splits)
     labels = sorted(list(set(datapoint[2] for datapoint in dataset)))
@@ -100,9 +91,7 @@ def collate_fn(batch, labels):
     targets = torch.stack(targets)
     return tensors, targets
 
-# -------------------------
-# M5 model (matches repo)
-# -------------------------
+
 class M5(nn.Module):
     def __init__(self, n_input=1, n_output=35, stride=16, n_channel=32):
         super().__init__()
@@ -139,9 +128,7 @@ class M5(nn.Module):
         x = self.fc1(x)                   # [B, 1, n_output]
         return F.log_softmax(x, dim=2)    # match original repo (log-probs)
 
-# -------------------------
-# Prepare data loaders
-# -------------------------
+
 print("Preparing datasets (this may download first time)...")
 train_set = SubsetSC("training", root="/content")
 val_set = SubsetSC("validation", root="/content")
@@ -152,7 +139,6 @@ print("Labels (n):", len(labels))
 print(labels)
 
 if args.debug:
-    # tiny subset for fast debugging
     random.seed(42)
     train_set = torch.utils.data.Subset(train_set, list(range(min(2000, len(train_set)))))
     val_set = torch.utils.data.Subset(val_set, list(range(min(400, len(val_set)))))
@@ -167,16 +153,12 @@ val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False, collate_f
 test_loader = DataLoader(test_set, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate,
                          num_workers=NUM_WORKERS, pin_memory=(DEVICE.startswith("cuda")))
 
-# -------------------------
-# Build model, optimizer, scheduler
-# -------------------------
+
 model = M5(n_input=1, n_output=len(labels)).to(DEVICE)
 optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=0.0001)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
 
-# -------------------------
-# Training / validation / test helpers
-# -------------------------
+
 def train_one_epoch(epoch):
     model.train()
     running_loss = 0.0
@@ -216,9 +198,7 @@ def evaluate(loader, setname="Val"):
     print(f"{setname} Accuracy: {acc:.4f} ({correct}/{total})")
     return acc
 
-# -------------------------
-# Training loop
-# -------------------------
+
 best_val = 0.0
 checkpoint_path = os.path.join(BASE_DIR, "cnn_m5_checkpoint.pth")
 
@@ -237,14 +217,12 @@ for epoch in range(1, N_EPOCHS + 1):
         print("Saved checkpoint:", checkpoint_path)
     scheduler.step()
 
-# Load best checkpoint and test
+
 ck = torch.load(checkpoint_path, map_location=DEVICE)
 model.load_state_dict(ck["model_state"])
 test_acc = evaluate(test_loader, "Test")
 
-# -------------------------
-# Save final results
-# -------------------------
+
 results_csv = os.path.join(BASE_DIR, "results.csv")
 if not os.path.exists(results_csv):
     pd.DataFrame(columns=["Model", "Accuracy"]).to_csv(results_csv, index=False)

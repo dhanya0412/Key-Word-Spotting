@@ -1,6 +1,4 @@
-
 # /content/drive/MyDrive/KWS_project/train_lstm_plain.py
-
 import os
 import argparse
 import numpy as np
@@ -15,9 +13,6 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 torch.backends.cudnn.benchmark = True
 
 
-# -------------------------------------------------------
-# MFCC Dataset
-# -------------------------------------------------------
 class MFCCDataset(Dataset):
     def __init__(self, df, label_list):
         self.df = df.reset_index(drop=True)
@@ -50,9 +45,6 @@ def collate_fn(batch):
     return padded, lengths, labels
 
 
-# -------------------------------------------------------
-# ✨ Plain LSTM Model (same spirit as original repo)
-# -------------------------------------------------------
 class PlainLSTM(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_classes, num_layers=1, dropout=0.2):
         super().__init__()
@@ -75,9 +67,6 @@ class PlainLSTM(nn.Module):
         return logits
 
 
-# -------------------------------------------------------
-# Training + Eval
-# -------------------------------------------------------
 def train_epoch(model, loader, optimizer, criterion, device):
     model.train()
     total, correct, total_loss = 0, 0, 0
@@ -116,10 +105,6 @@ def evaluate(model, loader, criterion, device, desc="Eval"):
 
     return total_loss / total, correct / total
 
-
-# -------------------------------------------------------
-# MAIN
-# -------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--meta", required=True)

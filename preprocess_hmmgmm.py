@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-"""
-Preprocess Speech Commands into MFCC+d1+d2 .npy features
-using GLOBAL speaker-disjoint 80/10/10 split.
-
-Linear-mix augmentation:
-- 10% probability for EVERY sample (train/val/test).
-- y_aug = 0.9 * clean + 0.1 * noise
-
-Saves:
-  <basename>.npy         (original)
-  <basename>_aug.npy      (augmented)  IF chosen
-"""
 
 import os
 import argparse

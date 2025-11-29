@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Preprocess Speech Commands (v0.02) into MFCC + d1 + d2 .npy features,
-preserve original wav basename, add speaker column, and assign split
-(train/validation/testing) using Google's split lists.
-"""
 import os
 import argparse
 import librosa

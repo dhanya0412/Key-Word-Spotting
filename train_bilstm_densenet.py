@@ -1,7 +1,3 @@
-"""
-Train a BiLSTM -> DenseNet1D hybrid on MFCC features saved by your preprocess script.
-Compatible with features: np.load(path) -> shape (36, T)  (mfcc + d1 + d2)
-"""
 
 import os
 import argparse
@@ -17,9 +13,6 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 torch.backends.cudnn.benchmark = True
 
-# -------------------------
-# Dataset + collate
-# -------------------------
 class MFCCDataset(Dataset):
     def __init__(self, df, label_list):
         self.df = df.reset_index(drop=True)
@@ -50,9 +43,7 @@ def collate_fn(batch):
 
     return padded, lengths, labels
 
-# -------------------------
-# DenseNet-like 1D blocks
-# -------------------------
+
 class DenseLayer1D(nn.Module):
     def __init__(self, in_ch, growth, kernel_size=3):
         super().__init__()
@@ -62,7 +53,6 @@ class DenseLayer1D(nn.Module):
         self.conv = nn.Conv1d(in_ch, growth, kernel_size, padding=padding, bias=False)
 
     def forward(self, x):
-        # x: (B, C, T)
         out = self.conv(self.act(self.bn(x)))
         return out
 
@@ -95,9 +85,6 @@ class Transition1D(nn.Module):
     def forward(self, x):
         return self.conv(self.act(self.bn(x)))
 
-# -------------------------
-# Model: BiLSTM -> DenseNet1D -> classifier
-# -------------------------
 class BiLSTM_DenseNet(nn.Module):
     def __init__(self,
                  input_dim=36,
@@ -109,9 +96,6 @@ class BiLSTM_DenseNet(nn.Module):
                  transition_reduction=0.5,
                  num_classes=35,
                  dropout=0.2):
-        """
-        db_config: tuple -> (n_blocks, layers_per_block)
-        """
         super().__init__()
         self.bidirectional = bidirectional
         num_directions = 2 if bidirectional else 1
@@ -156,9 +140,6 @@ class BiLSTM_DenseNet(nn.Module):
         logits = self.classifier(out)    # (B, num_classes)
         return logits
 
-# -------------------------
-# Training / eval helpers
-# -------------------------
 def train_epoch(model, loader, optimizer, criterion, device):
     model.train()
     total, correct, total_loss = 0, 0, 0
@@ -194,9 +175,7 @@ def evaluate(model, loader, criterion, device, desc="Eval"):
             pbar.set_postfix(loss=total_loss/total, acc=100.*correct/total)
     return total_loss / total, correct / total
 
-# -------------------------
-# Main
-# -------------------------
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--meta", required=True, help="metadata.csv created by preprocess")
@@ -276,9 +255,7 @@ def main():
             }, ckpt_path)
             print("Saved best model to", ckpt_path)
 
-    # -------------------------
-# After training: evaluate best model on TEST and save CSV
-# -------------------------
+   
     print("\nLoading best validation checkpoint for final test evaluation...")
     best_ckpt = os.path.join(args.outdir, "bilstm_densenet_best(wo_noise).pth")
     state = torch.load(best_ckpt, map_location=device)

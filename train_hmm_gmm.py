@@ -27,7 +27,7 @@ VALID_ROOT = PROCESSED_ROOT
 TEST_ROOT = PROCESSED_ROOT
 OUT_MODEL_PATH = f"{BASE_DIR}/models/hmmgmm_model.pkl"
 
-print("✅ Paths configured:")
+print(" Paths configured:")
 print("  Processed root:", PROCESSED_ROOT)
 print("  Model path:", OUT_MODEL_PATH)
 
@@ -92,11 +92,6 @@ class GMM:
         self.vars = None
 
     def _normalize_Xlist(self, Xlist, expected_feat=36):
-        """
-        Convert list of numpy arrays (feat_dim, T) or (T, feat_dim) into list of (N_i, D) rows
-        where each element is shape (N_i, D) (frames x features) and dtype float32.
-        expected_feat = 36 by default (3 * n_mfcc)
-        """
         seqs = []
         for x in Xlist:
             if x is None:
@@ -180,10 +175,6 @@ class GMM:
         return self
 
     def score_samples(self, X):
-        """
-        X: numpy (T,D) or (D,T) or torch
-        returns torch tensor shape (T,) with per-frame log-likelihoods
-        """
         if torch.is_tensor(X):
             X_np = X.detach().cpu().numpy()
         else:
@@ -203,7 +194,6 @@ class GMM:
         return torch.logsumexp(log_w, dim=1)
 
 
-# HMM-GMM class with all methods INSIDE the class
 class HMMGMM:
     def __init__(self, n_states=3, n_mix=2, n_iter=6, device='cpu', gmm_iter=8):
         self.n_states = n_states
@@ -223,10 +213,6 @@ class HMMGMM:
         self.gmms = [GMM(n_mix=n_mix, n_iter=gmm_iter, device=self.device) for _ in range(n_states)]
 
     def _compute_emission_loglik(self, X):
-        """
-        Robust: accept X as numpy or torch, shape (36, T) or (T, 36).
-        Returns B (T, S) torch on self.device.
-        """
         expected_feat = 3 * 12  # 36
         if torch.is_tensor(X):
             X_np = X.detach().cpu().numpy()
@@ -378,10 +364,9 @@ class HMMGMM:
         return loglik.item()
 
 
-print("✅ HMMGMM class defined with all methods")
+print("HMMGMM class defined with all methods")
 
 
-# Training and prediction wrapper functions
 def train_GMMHMM(dataset, n_states=3, n_mix=2, n_iter=5, device='cpu'):
     device = torch.device(device)
 
@@ -470,26 +455,25 @@ def build_dataset_from_meta(meta_csv, split_name):
 if __name__ == "__main__":
     meta_csv = f"{BASE_DIR}/processed/metadata.csv"
 
-    print("\n📂 Loading datasets...")
+    print("\n Loading datasets...")
     train_dataset = build_dataset_from_meta(meta_csv, 'training')
     valid_dataset = build_dataset_from_meta(meta_csv, 'validation')
     test_dataset = build_dataset_from_meta(meta_csv, 'testing')
 
     print(f"Train: {len(train_dataset)}, Valid: {len(valid_dataset)}, Test: {len(test_dataset)}")
 
-    # --- LOAD SAVED MODEL ---
-    print("\n📦 Loading saved model...")
+    print("\nLoading saved model...")
     with open(OUT_MODEL_PATH, "rb") as f:
         models = pickle.load(f)
-    print("✅ Model loaded.")
+    print("Model loaded.")
 
-    # --- EVALUATION ONLY ---
+   
     '''
-    print("\n📊 Evaluating on training set...")
+    print("\n Evaluating on training set...")
     predict_GMMHMM(train_dataset, models, type='train')
 
-    print("\n📊 Evaluating on validation set...")
+    print("\n Evaluating on validation set...")
     predict_GMMHMM(valid_dataset, models, type='validation')
     ''' 
-    print("\n📊 Evaluating on test set...")
+    print("\nEvaluating on test set...")
     predict_GMMHMM(test_dataset, models, type='test')
