@@ -1,0 +1,8 @@
+numpy
+pandas
+tqdm
+torch
+torchaudio
+soundfile
+librosa
+scipy
