@@ -150,9 +150,3 @@ y_aug[n] = 0.9 * clean[n] + 0.1 * noise[n]
 **Dhanya Girdhar**  
 **Raashi Sharma**   
 
----
-
-
-## 📎 License
-
-This project is intended for academic and research purposes.
